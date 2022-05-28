@@ -20,5 +20,8 @@ WORKDIR /app/nestjs
 # Install express project node packages
 RUN npm install
 
+# Nest js Build To dist directory
+RUN npx nest build
+
 # Docker start script
-CMD npm run start
+CMD npm run start:prod
