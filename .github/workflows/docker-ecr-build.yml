@@ -22,11 +22,23 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{secrets.AWS_REGION}}
-      - name: Build the Docker image
-        run: docker build -t include-nestjs-image ./docker/include-nestjs
-      - name: AWS ECR Login
-        run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
-      - name: AWS ECR tag settings
-        run: docker tag include-nestjs-image public.ecr.aws/${{secrets.AWS_ECR_REGISTRY_ALIAS}}/include-nestjs-image
-      - name: AWS ECR public repository Upload docker image
-        run: docker push public.ecr.aws/${{secrets.AWS_ECR_REGISTRY_ALIAS}}/include-nestjs-image
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Docker Build, Tag, Push image to AWS ECR
+        env:
+          ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
+          IMAGE_TAG: include-nestjs-image
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./docker/include-nestjs
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+#      - name: Build the Docker image
+#        run: docker build -t include-nestjs-image ./docker/include-nestjs
+#      - name: AWS ECR Login
+#        run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
+#      - name: AWS ECR tag settings
+#        run: docker tag include-nestjs-image public.ecr.aws/${{secrets.AWS_ECR_REGISTRY_ALIAS}}/include-nestjs-image
+#      - name: AWS ECR public repository Upload docker image
+#        run: docker push public.ecr.aws/${{secrets.AWS_ECR_REGISTRY_ALIAS}}/include-nestjs-image
