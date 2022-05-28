@@ -24,4 +24,9 @@ jobs:
           aws-region: ${{secrets.AWS_REGION}}
       - name: Build the Docker image
         run: docker build -t include-nestjs-image ./docker/include-nestjs
-
+      - name: AWS ECR Login
+        run: aws ecr get-login-password --region ${{secrets.AWS_REGION}} | docker login --username AWS --password-stdin ${{secrets.AWS_ACCOUNT_ID}}.dkr.ecr.${{secrets.AWS_REGION}}.amazonaws.com
+      - name: AWS ECR tag settings
+        run: docker tag include-nestjs-image public.ecr.aws/${{secrets.AWS_ECR_REGISTRY_ALIAS}}/include-nestjs-image
+      - name: AWS ECR public repository Upload docker image
+        run: docker push public.ecr.aws/${{secrets.AWS_ECR_REGISTRY_ALIAS}}/include-nestjs-image
